@@ -2,7 +2,7 @@
 title: Mapping and the geospatial ecosystem in R
 subtitle: Subtitle
 author: Carlos Cámara-Menoyo
-date: last-modified
+date: 2024-06-10
 date-format: long
 format: 
   warwickpres-revealjs: 
@@ -10,13 +10,788 @@ format:
       data-background-image: warwick-logo-white.png
       data-background-size: 15%
       data-background-position: 100% 0%
+    navigation-mode: vertical
+    controls-layout: bottom-right
+    controls-tutorial: true
+execute:
+  echo: true
 ### To remove the logo from the title page, 
 ### delete lines 7-12 above and uncomment the two lines below
 #format:
 #  warwickpres-revealjs: default
 ---
 
-## Introduction
+## About me {.center .center-h background-image="https://slides.carloscamara.es/img/about-me/hackaton-cadaveres-inmobiliarios.jpg" background-opacity="0.75" background-color="#000000"}
+
+[**Carlos Cámara-Menoyo**]{.larger175}
+
+Senior Research Software Engineer</br>
+[Centre for Interdisciplinary Methodologies](https://warwick.ac.uk/cim)
+
+I love maps and data visualisation.
+
+[[https://carloscamara.es/en](https://carloscamara.es/en) | [@ccamara@scholar.social](https://scholar.social/@ccamara)]{.smaller80}
+
+
+::: notes
+
+And R, and participation, and OpenStreetMap, and many other stuff. If you want to know more about me, you can find me here:
+
+:::
+
+## How can I create a map using R?{#question.center-h .center .larger125} 
+
+. . .
+
+That's the question I've been asked a lot, and the question I will try to answer today (kind of)
+
+## Aims {background-image="img/roadmap.png" background-opacity="0.5"}
+
+- Provide an overview of the mapping process in R
+  - Identifying different components of a map
+  - Introducing different R packages for specific tasks
+- Provide the theoretical foundations to understand the (many) tutorials about maps and geospatial information (with R)
+- Provide some basic code examples to highlight basic concepts and packages
+
+. . . 
+
+Out of scope:
+
+- Not a course on cartography or creating beautiful data visualisations or maps
+- Not a course about Spatial operations -\> Read https://r.geocompx.org/ by Robin lovelace
+- Not an advanced training on any of the packages used
+
+# What's a map? {.inverse}
+
+## {#map-navigation data-menu-title="Navigation maps" background-image="img/maps-car.jpg" background-color="#000000"}
+
+::: notes
+
+This is probably the map we are more familiar with: a routing map for cars, usually populated by Google
+
+:::
+
+
+
+## {#map-makers data-menu-title="Markers"}
+
+![Map types: markers](img/map-markers.png)
+
+## {#map-streetfigther data-menu-title="Maps are relative (1)" background-image="img/map-streetfighter.jpg"}
+
+## {#map-upside-down data-menu-title="Maps & projections" background-image="img/map-projections.jpg"}
+
+## {#map-pokemon data-menu-title="Maps are fun" }
+
+
+:::columns
+
+::: {.column width="50%"}
+![](img/map-pokemon.jpg)
+
+:::
+
+::: {.column width="50%"}
+
+![An excellent tutorial by Andrew Heiss on doing a Middle Earth Map ussing `{ggplot}` and `{sf}`](img/map-middle-earth.png)
+
+:::
+
+:::
+
+- Maps are serious, but can be fun!
+- We can map almost anything (even Pokemons or Middle Earth)
+
+
+## There's no such thing as "a map"!
+
+
+- Maps can serve different purposes
+- There are many types of maps
+  - Maps are more than routing maps (usually powered by Google)
+  - Maps are more than what Google maps or political maps
+- Maps can be static (images) or interactive (web, apps)
+- Maps can visualise information in different ways (points, choropleth, facets...)
+- Maps are subjective (aka political) (i.e. north, center, projections...)
+
+...
+
+But there's something they all have in common...
+
+# Spatial data
+
+Spatial data situates something in the space (world*)
+
+Because of Earth is round and maps are usually flat, spatial data needs to be projected using [Coordinate Reference Systems](https://en.wikipedia.org/wiki/Spatial_reference_system) (CRS)
+
+
+## Type of spatial data
+
+- Points: (latitude, longitude)
+- Lines
+- Polygons (or MultiPolygons)
+
+## Source:
+
+- From Open Repositories (ONS Geoportal, Eurostat, ...)
+  - Spatial formats: `.geojson`, `.geopkg`, `.shp`, `.topojson`, (`.csv`)
+```r
+sf::read_sf("data/CNTR_RG_20M_2020_4326.gpkg")
+```
+- Built in in some specialised packages, such as `{spData}` or `{tmap}`
+
+
+- Geocoding: translating addresses to coordinates
+
+## Geocoding
+
+
+[\* But it could be something else, like the Moon, [Middle Earth](https://www.andrewheiss.com/blog/2023/04/26/middle-earth-mapping-sf-r-gis/)...]{.smaller60 .bottom}
+
+## Summary
+
+-   Types
+-   Projections
+
+Anatomy of a map:
+
+Regardless of their tpe, a map always have at least, the following:
+
+-   Spatial data
+
+-   Basemap
+
+-   Projection system
+
+-   (along with scale, title, legend...)
+
+# Map types
+
+-   Basemap
+-   Point maps
+-   Choropleth maps
+-   Cartograms
+-   Interactive maps vs images
+
+# Working with spatial data {.inverse}
+
+## Types of spatial data
+
+::: columns
+::: {.column width="45%"}
+By geometry:
+
+-   Points (i.e. markers). usually expressed as lat, long, or x, y
+-   Lines (i.e. streets)
+-   Polygons (i.e. countries' borders)
+-   (basemaps)
+:::
+
+::: {.column width="45%"}
+By source:
+
+-   Provided by a file (spatial format)
+-   Provided by a package
+:::
+:::
+
+-   Polygons:
+
+sf
+
+# Packages by purpose
+
+-   Spatial data
+    -   {sf}
+    -   [`{spData}`](https://jakubnowosad.com/spData/): provides spatial datasets (i.e. World country polygons)
+    -   [`{giscoR}`](https://ropengov.github.io/giscoR/) an API package that helps to retrieve data from [Eurostat - GISCO (the Geographic Information System of the COmmission)](https://ec.europa.eu/eurostat/web/gisco).
+-   Geocoding
+    -   [`tidygeocoder`](https://jessecambon.github.io/tidygeocoder/)
+-   Visualisation
+    -   `mapsf` uses [`sf`](https://CRAN.R-project.org/package=sf) objects to produce `base` graphics.
+    -   tmap
+    -   ggplot + ggspatial
+
+# Geocoding {.inverse}
+
+Translate an address into coordinates
+
+we can use https://jessecambon.github.io/tidygeocoder/
+
+-   
+
+# Visualisation {.inverse}
+
+## base R
+
+## ggplot
+
+# Loading data
+
+Spatial data is different than regular data (i.e. dataframe) because it contains
+
+-   Geometry: coordinates defining and situating a point, line or polygon in the world
+
+-   Attributes for every geometry
+
+-   Coordinate Reference System (CRS)
+
+{sf} (Simple Features) is the package...
+
+## Read from files
+
+```{r}
+library(sf)
+
+
+```
+
+# Case 0: Simple point "map" {.inverse}
+
+------------------------------------------------------------------------
+
+Read a csv with points. Create a plot with base R and give a size to dots based on population.
+
+Note how disappointing this might be: - lacks base map - not the type of map we are used to
+
+We will come back to it later
+
+## Loading the "spatial" data
+
+We will read a `csv` file containing the latitude and longitude of cities in the world:
+
+```{r}
+cities_world <- read.csv("data/worldcities.csv")
+
+# Check the class
+class(cities_world)
+
+head(cities_world, 3)
+
+```
+
+. . .
+
+...but wait... this is a regular data frame right? Can we create a map from a data frame?
+
+## Visualising
+
+Latitude and longitude are numbers that can position a point in the world, in a similar way than `x` and `y` work in cartesian space. -\> We can use base R's `plot()`:
+
+```{r}
+plot(cities_world$lng, cities_world$lat, 
+     pch = 21, bg = "red", main="World Cities")
+```
+
+##  {#dissappointment .center .center-h data-menu-title="I sense your dissappointment"}
+
+***Is this a good map?***
+
+. . .
+
+Sure, we could improve this visualisation (i.e. removing borders, axis, map size according to population, adding a background...)
+
+. . .
+
+***Is this even a map?***
+
+. . .
+
+Fair point! Is this really a spatial visualisation or a regular visualisation that we read as a geographical space?
+
+We are getting philosophical here!
+
+::: notes
+I sense your frustration. I know what you're thinking now:
+:::
+
+
+# Case 1: Simple choropleth map of the world {.inverse}
+
+## Retrieving data
+
+In this case, we will be be using data provided by the `spData` package:
+
+```{r}
+# Load built-in data.
+world <- spData::world
+
+# Check object's type (pay attention to the output!)
+str(world)
+
+```
+
+::: notes
+This is a `sf` object, which is very similar to well-known `data frames`.
+
+That means that, internally, `spData` uses `sf`.
+:::
+
+------------------------------------------------------------------------
+
+`sf` objects draw many similarities with `data frames`, so we can use well-known functions:
+
+```{r}
+# This looks very similar to a dataframe
+head(world, 3)
+```
+
+::: {.callout-important collapse="true" title="Can you spot any difference with regular `data frames`?"}
+Check speaker's notes for solution! (press `s`)
+:::
+
+## Visualising an sf
+
+We can visualise plot using base R (or ggplot or specialised libraries!)
+
+```{r}
+# Plotting the entire sf object
+plot(world)
+
+```
+
+## Plotting a single variable
+
+::: panel-tabset
+### Categorical variable
+
+```{r}
+# Plotting a categorical attribute
+plot(world["continent"])
+```
+
+### Numerical variable
+
+```{r}
+# Plotting a categorical attribute
+plot(world["lifeExp"], main = "Life Expectancy per country")
+```
+:::
+
+Admittedly, we could use our expertise in data visualisation and base R graphics to dramatically improve this to better communicate our findings, i.e., colour scale, cutters, legend, title...but it's good enough. And quick!
+
+## Visualising with ggplot
+
+Some may be more familiar with ggplot, so we can use that, too:
+
+```{r}
+#| code-line-numbers: "|5,7"
+#| output-location: column
+
+library(ggplot2)
+
+plot_ggchoro <- ggplot(world) +
+  # geom_sf is used to visualise sf geometries
+  geom_sf(color = "white", aes(fill = lifeExp)) +
+  # geom_sf_text visualises the value of a column based on their geometries
+  geom_sf_text(aes(label = iso_a2), size = 2) + 
+  # Add a title and hide x and y labels.
+  labs(title = "Life expectancy by country",
+       x = NULL, y = NULL) +
+  theme_minimal()
+
+# Result in next slide
+plot_ggchoro
+
+```
+
+## But there is more! 
+
+Reprojecting the Coordinate Reference System (CRS)
+
+::: columns
+::: {.column width="48%"}
+
+```{r}
+plot_ggchoro + # We are reusing the ggplot from the previous code
+  coord_sf(crs = st_crs(3035)) #st_crs is provided by sf
+
+```
+
+:::
+
+::: {.column with="48%}
+
+```{r}
+plot_ggchoro + # We are reusing the ggplot from the previous code
+  coord_sf(crs = "+proj=moll") #st_crs is provided by sf
+```
+:::
+:::
+
+More info: [Reprojecting geographic data](https://r.geocompx.org/reproj-geo-data.html?q=leaflet#reproj-geo-data) chapter in Geocmputation with R 
+
+---
+
+```{r}
+# Or zooming in!
+plot_ggchoro + 
+  coord_sf(xlim = c(-12.48, 31.05), ylim = c(10.37, 60.07),
+           expand = FALSE)
+```
+
+## Recap
+
+-   In this example we have used the visualisation tools and methods we are familiar with to viusalise spatial data (as opposed to regular data in the previous example).
+
+-   Spatial data has
+
+# Case: Interactive map using leaflet {.inverse}
+
+## Point maps
+
+```{r}
+
+
+library(leaflet)
+
+leaflet(data = cities_world[cities_world$capital == "primary", ]) |> 
+  addTiles() |>   # Add default OpenStreetMap map tiles
+  addCircles(~lng, ~lat, radius = ~population/100)
+```
+
+
+## Choropleth maps
+
+```{r}
+leaflet() |> 
+  addTiles() |>  # Add default OpenStreetMap map tiles
+  addPolygons(data = world)
+```
+
+---
+
+```{r .code-overflow-scroll .smaller80}
+#| output-location: column
+
+# Need to define the cuts, bins and color palette beforehand.
+bins <- c(0, 20, 40, 60, 80, 100, Inf)
+pal <- colorBin("YlOrRd", domain = world$lifeExp, bins = bins)
+
+map_leaflet <- leaflet() |> 
+  addTiles() |>  # Add default OpenStreetMap map tiles
+  addPolygons(data = world, fillColor = ~pal(lifeExp),
+    weight = 2, opacity = 1, color = "white",
+    dashArray = "3", fillOpacity = 0.7) 
+
+map_leaflet
+```
+
+---
+
+```{r}
+#| output-location: column
+map_leaflet |>  
+  addPolygons(data = world, 
+    fillColor = ~pal(lifeExp),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE))
+
+```
+
+---
+
+Combining multiple layers, interaction, fullscreen control and mini-map:
+
+```{r}
+#| output-location: column
+
+library(leaflet.extras)
+
+labels <- sprintf(
+  "<strong>%s</strong><br/>%g years",
+  world$name_long, round(world$lifeExp,2)
+) %>% lapply(htmltools::HTML)
+
+
+map_leaflet |> 
+  setView(0,1,2) |> 
+  addPolygons(data = world, 
+    fillColor = ~pal(lifeExp),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) |> 
+  addCircles(data = cities_world[cities_world$capital == "primary", ],
+    ~lng, ~lat, radius = ~population/100) |> 
+  addMiniMap() |> 
+  addFullscreenControl()
+  
+```
+
+
+
+## More
+
+* [Getting started vignette](https://rstudio.github.io/leaflet/articles/leaflet.html)
+* [Adding legends](http://rstudio.github.io/leaflet/reference/addLegend.html)
+* [How to create interactive web maps in R using leaflet package](https://aagarw30.gitbooks.io/r-leaflet/content/) (handbook)
+* [Leaflet extras](https://trafficonese.github.io/leaflet.extras/)
+
+
+# Case 2: Choropleth map with tmap {.inverse}
+
+## Tmap
+
+Explain what it is
+
+## Loading and exploring data
+
+```{r}
+library(tmap)
+
+# Tmap provides a built in dataset called `World```
+data(World)
+
+class(World)
+
+head(World, 3)
+```
+
+
+## Visualising
+
+Tmap uses a "grammar of graphics" which is very similar to ggplot's:
+
+::: columns
+::: {.column width="48%"}
+```{r}
+tm_shape(World) + 
+  tm_borders()
+
+```
+:::
+
+::: {.column width="48%"}
+```{r}
+tm_shape(World) + 
+  tm_borders(lw = 2, lt=4, col = "blue")
+
+```
+:::
+:::
+
+---
+
+::: columns
+::: {.column width="48%"}
+```{r}
+tm_shape(World) +
+  tm_fill()
+
+```
+
+:::
+
+::: {.column width="48%"}
+```{r}
+tm_shape(World) +
+  tm_fill("well_being")
+```
+:::
+:::
+
+---
+
+
+And we can combine them together!
+
+```{r}
+tm_shape(World) + 
+  tm_fill(col = "#3C1053") + 
+  tm_borders(col = "white") + 
+  tm_text("iso_a3", size = 0.25)
+```
+
+
+---
+
+
+```{r}
+map_demo <- tm_shape(World) +
+  tm_polygons("well_being", legend.title = "Happy Planet Index", palette = "viridis") +
+  tm_dots(size = "inequality", alpha = 0.5, col = "red") +
+  tm_scale_bar() + #Tmap tries to position scale and compass in an empty area, but we can control their position
+  tm_compass(position = c("left", "top")) +
+  tm_layout(main.title = "Tmap showcase")
+
+map_demo
+```
++info: https://r-tmap.github.io/tmap-book/visual-variables.html
+
+## Interactive mapping
+
+```{r}
+tmap_mode("view")
+
+map_demo
+
+```
+
+
+## Facetting
+
+```{r}
+
+tmap_mode("plot") # Switch to printed map mode.
+
+map_facet <- tm_shape(World) +
+  tm_polygons(c("economy", "life_exp")) +
+  tm_facets(ncol = 2,sync = TRUE,)
+
+map_facet
+```
+
+---
+
+
+```{r}
+
+tmap_mode("view")
+
+map_facet
+
+```
+
+## More info about tmap
+
+* [Getting started vignette](https://r-tmap.github.io/tmap/articles/tmap-getstarted.html)
+* [Official Tmap handbook](https://r-tmap.github.io/tmap-book/)
+* [Geocomputation with R chapter](https://r.geocompx.org/adv-map#static-maps)
+
+# Case 3: Basic spatial manipulation and visualisation with `{mapsf}` {.inverse}
+
+## Overview
+
+We are going to create a slightly more complex choropleth.
+
+We will be joining two datasets (an sf and a data frame) and overlaying another layer with points.
+
+To do so, we will be using a specialised library: `{mapsf}`. 
+
+
+## Loading data
+
+
+* `englandHealthStats`: A regular dataframe with National Statistics Health Index for the Upper Tier Local Authority and Regions over the 2015-2018 (no geometry)
+
+```{r}
+# Read the csv 
+englandHealthStats <- read.csv("data/England_all_geog_aggregated_2018.csv")
+
+head(englandHealthStats, 4)
+
+```
+
+---
+
+
+* `boundaries_counties_ua_buc`: Counties and Unitary Authorities (December 2019) Boundaries UK BUC, from the [ONS Geoportal](https://geoportal.statistics.gov.uk/maps/counties-and-unitary-authorities-december-2019-boundaries-uk-buc)
+
+
+```{r}
+# Source: 
+boundaries_counties_ua_buc <- read_sf("data/CTYUA_Dec_2019_UGCB_in_the_UK_2022_4135466293491974949.gpkg") #20m
+
+head(boundaries_counties_ua_buc, 4)
+
+```
+
+## Combining data together
+
+`sf` objects are "Spatial Dataframes", and as such, we can use same operations as those used with regular dataframes, such as dplyr's joins:
+
+```{r}
+sdf <- dplyr::left_join(boundaries_counties_ua_buc, englandHealthStats, 
+                        by = c("ctyua19nm" = "Area_name"))
+
+head(sdf, 4)
+```
+
+## A basic visualising with `{mapsf}`
+
+```{r}
+library(mapsf)
+
+mf_map(x = sdf, type = "choro", var = "dementia")
+
+```
+
+---
+
+```{r}
+cities_uk <- st_as_sf(cities_world, coords = c("lng","lat"))
+st_crs(cities_uk) <- 4326
+class(cities_uk)
+
+cities_uk <- cities_uk[cities_world$iso2 == "GB",]
+
+cities_uk_reprojected <- st_transform(cities_uk, crs = 27700)
+```
+
+
+
+---
+
+Customisations:
+
+```{r}
+# Plot regions and dementia indicators
+mf_map(x = sdf, type = "choro", var = "dementia") 
+# plot cities
+mf_map(
+  x = cities_uk_reprojected,
+  var = "population",
+  type = "prop",
+  col = "brown4",
+  leg_title = "Total population"
+)
+# layout (title, scale, north and credits)
+mf_layout(
+  title = "Health indicators in the UK",
+  credits = "ONS (health data)",
+)
+
+
+```
+
+
+
+## The benefits
+
+Beyond creating a beatiful map very quickly and easily, there are more benefits:
+
+-   Ability to show legend easily
+-   Ability to change projection
+
+## More info
+
+- https://riatelab.github.io/mapsf/
+
+------------------------------------------------------------------------
+
+# Demo slides
 
 This is a Quarto presentation format that is consistent with The University of Warwick's [brand](https://warwick.ac.uk/about/brand/), especially its [colours](https://warwick.ac.uk/about/brand/brand-guidelines/colours/) and [typography](https://warwick.ac.uk/about/brand/brand-guidelines/typography/).
 
@@ -24,19 +799,19 @@ It also features the University of Warwick logo on the title slide.
 
 . . .
 
-:::{.callout-note}
+::: callout-note
 To remove the logo from the title slide, delete the replace lines 7-12 of this `.qmd` file and uncomment lines 15-16.
 :::
 
-:::{.notes}
+::: notes
 Speaker notes go here.
 :::
 
 # inverse class for section headings {.inverse}
 
-## {.inverse .center-h .center .larger125}
+##  {.inverse .center-h .center .larger125}
 
-inverse class is also useful for stressing *key points*. 
+inverse class is also useful for stressing *key points*.
 
 ## Colours
 
@@ -50,7 +825,7 @@ There's a colour for inline code such as `x <- c(1, 3, 6)` and `{.inverse}`.
 
 There's also a colour for short [links](https://github.com/Warwick-Stats-Resources/warwickpres) and full ones like <https://quarto.org/docs/presentations/revealjs/>.
 
-- The inline code and link colours change when the inverse class is applied.
+-   The inline code and link colours change when the inverse class is applied.
 
 ## Code
 
@@ -84,63 +859,33 @@ For plotting, the warwickpres extension goes hand-in-hand with the **warwickplot
 
 <https://warwick-stats-resources.github.io/warwickplots/>
 
-```{r}
-#| echo: false
-library(warwickplots)
-plot(warwick_palettes)
-```
-
-
 ## warwickplots example
-
-```{r}
-#| echo: true
-#| output-location: slide
-#| code-line-numbers: "|9,15"
-library(ggplot2)
-library(warwickplots)
-library(palmerpenguins)
-
-ggplot(penguins, aes(flipper_length_mm, body_mass_g, group = species)) +
-  geom_point(aes(colour = species, shape = species), 
-             alpha = 0.8, 
-             size = 2) +
-  scale_color_palette_d(warwick_palettes$primary) +
-  labs(title = "Penguin Size, Palmer Station LTER",
-       subtitle = "Flipper length and body mass for **<span style = 'color:#3C1053;'>Adelie</span>**, **<span style = 'color:#6DCDB8;'>Chinstrap</span>** and **<span style = 'color:#CB333B;'>Gentoo</span>** Penguins. This is based on data made available in the **palmerpenguins** R package.",
-       caption = "Visualization: Ella Kaye, Data: Gorman, Williams & Fraser (2014) DOI: 10.1371/journal.pone.009008",
-       x = "flipper length (mm)",
-       y = "body mass (g)") +
-  theme_warwick() +
-  theme(legend.position = 'none')
-```
 
 ## Callouts {.smaller60}
 
-There are custom colours for callouts: 
+There are custom colours for callouts:
 
-:::{.callout-note}
+::: callout-note
 A note
 :::
 
-:::{.callout-warning}
+::: callout-warning
 A warning
 :::
 
-:::{.callout-important}
+::: callout-important
 Something important
 :::
 
-:::{.callout-tip}
+::: callout-tip
 This is a good idea
 :::
 
-:::{.callout-caution}
+::: callout-caution
 Be careful about doing this
 :::
 
 These require a raw html chunk at the end of the presentation `.qmd` file (included in template). Callouts do **not** look good on the inverse background.
-
 
 # Non-Warwick-specific nice-to-haves {.inverse}
 
@@ -148,15 +893,15 @@ These require a raw html chunk at the end of the presentation `.qmd` file (inclu
 
 There are classes to help with text alignment:
 
-:::{.center-h}
+::: center-h
 `{.center-h}` gives horizontally-centered text
 :::
 
-:::{.right}
+::: right
 `{.right}` gives right-aligned text
 :::
 
-:::{.callout-note}
+::: callout-note
 For all revealjs Quarto presentations, applying `{.center}` to the slide title vertically centers the whole slide.
 :::
 
@@ -164,11 +909,9 @@ For all revealjs Quarto presentations, applying `{.center}` to the slide title v
 
 There are classes to help size text by a given percentage:
 
-[`{.smaller90}`]{.smaller90}, [`{.smaller80}`]{.smaller80}, [`{.smaller75}`]{.smaller75}
-[`{.smaller70}`]{.smaller70}, [`{.smaller60}`]{.smaller60}, [`{.smaller50}`]{.smaller50}
+[`{.smaller90}`]{.smaller90}, [`{.smaller80}`]{.smaller80}, [`{.smaller75}`]{.smaller75} [`{.smaller70}`]{.smaller70}, [`{.smaller60}`]{.smaller60}, [`{.smaller50}`]{.smaller50}
 
-[`{.larger125}`]{.larger125}, [`{.larger150}`]{.larger150}, [`{.larger175}`]{.larger175}, 
-[`{.larger200}`]{.larger200}, [`{.larger250}`]{.larger250}
+[`{.larger125}`]{.larger125}, [`{.larger150}`]{.larger150}, [`{.larger175}`]{.larger175}, [`{.larger200}`]{.larger200}, [`{.larger250}`]{.larger250}
 
 ## More information
 
