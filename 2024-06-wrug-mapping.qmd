@@ -190,8 +190,8 @@ According to
 -   **Static visualisation**
     -   base R plots
     -   `{ggplot}` (+ `{ggspatial}`)
-    -   [`{tmap}`](https://r-tmap.github.io/tmap/index.html)
-    -   [`{mapsf}`](https://riatelab.github.io/mapsf/articles/mapsf.html)
+    -   [`{tmap}`](https://r-tmap.github.io/tmap/index.html) creates thematic maps using grammar of graphics
+    -   [`{mapsf}`](https://riatelab.github.io/mapsf/articles/mapsf.html) maps `sf` objects on base graphics.
 -   **Interactive visualisation**
     -   [`{leaflet}`](https://rstudio.github.io/leaflet/) (+`{leaflet.extras}`)
     -   [`{tmap}`](https://r-tmap.github.io/tmap/index.html)
@@ -422,7 +422,9 @@ plotly::ggplotly(plot_ggchoro)
 
 -   In this example we have used the visualisation tools and methods we are familiar with to viusalise spatial data (as opposed to regular data in the previous example).
 
--   Spatial data has
+-   But... we have also seen some of the particularities of using spatial data
+
+In the next examples, we will be using specialised packages for visualising geospatial data
 
 # Case: Interactive map using leaflet {.inverse}
 
@@ -431,7 +433,6 @@ We will create a couple of (basic) interactive maps like the ones you're used to
 ## Point maps
 
 ```{r}
-
 
 library(leaflet)
 
@@ -666,7 +667,7 @@ map_facet
 -   [Official Tmap handbook](https://r-tmap.github.io/tmap-book/)
 -   [Geocomputation with R chapter](https://r.geocompx.org/adv-map#static-maps)
 
-# Case 3: Basic spatial manipulation and visualisation with `{mapsf}` {.inverse}
+# Case: Basic spatial manipulation and visualisation with `{mapsf}` {.inverse background-image="https://riatelab.github.io/mapsf/logo.png" background-size="10%" background-position="90% 50%"}
 
 ## Overview
 
@@ -676,9 +677,9 @@ We will be joining two datasets (an sf and a data frame) and overlaying another 
 
 To do so, we will be using a specialised library: `{mapsf}`.
 
-## Loading data
+## Loading data {.smaller80}
 
--   `englandHealthStats`: A regular dataframe with National Statistics Health Index for the Upper Tier Local Authority and Regions over the 2015-2018 (no geometry)
+-   `englandHealthStats.csv`: A regular dataframe with National Statistics Health Index for the Upper Tier Local Authority and Regions over the 2015-2018 (no geometry)
 
 ```{r}
 # Read the csv 
@@ -690,7 +691,8 @@ head(englandHealthStats, 4)
 
 ------------------------------------------------------------------------
 
--   `boundaries_counties_ua_buc`: Counties and Unitary Authorities (December 2019) Boundaries UK BUC, from the [ONS Geoportal](https://geoportal.statistics.gov.uk/maps/counties-and-unitary-authorities-december-2019-boundaries-uk-buc)
+::: {.smaller80}
+-   `boundaries_counties_ua_buc.gpkg`: Counties and Unitary Authorities (December 2019) Boundaries UK BUC, from the [ONS Geoportal](https://geoportal.statistics.gov.uk/maps/counties-and-unitary-authorities-december-2019-boundaries-uk-buc)
 
 ```{r}
 # Source: 
@@ -700,7 +702,9 @@ head(boundaries_counties_ua_buc, 4)
 
 ```
 
-## Combining data together
+:::
+
+## Combining data together {.smaller80}
 
 `sf` objects are "Spatial Dataframes", and as such, we can use same operations as those used with regular dataframes, such as dplyr's joins:
 
@@ -711,69 +715,107 @@ sdf <- dplyr::left_join(boundaries_counties_ua_buc, englandHealthStats,
 head(sdf, 4)
 ```
 
-## A basic visualising with `{mapsf}`
+## A basic choropleth with `{mapsf}`
 
 ```{r}
 library(mapsf)
 
-mf_map(x = sdf, type = "choro", var = "dementia")
+mf_map(x = sdf, type = "choro", var = "low_pay")
 
 ```
 
 ------------------------------------------------------------------------
 
-```{r}
-cities_uk <- st_as_sf(cities_world, coords = c("lng","lat"))
-st_crs(cities_uk) <- 4326
-class(cities_uk)
-
-cities_uk <- cities_uk[cities_world$iso2 == "GB",]
-
-cities_uk_reprojected <- st_transform(cities_uk, crs = 27700)
-```
-
-------------------------------------------------------------------------
-
-Customisations:
+::: {.smaller80}
+We can improve it further. {mapsf} follows the same logic (And parameters) as base R graphics:
 
 ```{r}
-# Plot regions and dementia indicators
-mf_map(x = sdf, type = "choro", var = "dementia") 
-# plot cities
-mf_map(
-  x = cities_uk_reprojected,
-  var = "population",
-  type = "prop",
-  col = "brown4",
-  leg_title = "Total population"
+#| output-location: slide
+mf_map(x = sdf, type = "choro", var = "unempl",
+  leg_title="Unemployment", breaks = "jenks")
+
+# Highlight region with top value
+mf_map(x = head(sdf[order(sdf$unempl), ],1), var = "ctyua19nm",
+  type = "base", border = "red", lwd = 1, col = NULL, alpha = 0, add = TRUE )
+
+# Labels for the top value
+mf_label(
+  x = head(sdf[order(sdf$unempl), ],1), var = "ctyua19nm",
+  cex = 0.5, halo = TRUE, r = 0.15
 )
-# layout (title, scale, north and credits)
+
+# Inset map
+mf_inset_on(x = "worldmap", pos = "topleft")
+mf_worldmap(sdf)
+mf_inset_off()
+
+# Layout (title, scale, north and credits)
 mf_layout(
-  title = "Health indicators in the UK",
-  credits = "ONS (health data)",
+  title = "Health indicators per Counties and Unitary Authorities",
+  credits = "Sources: National Statistics Health Index 2015-2018, (December 2019)",
+  frame = TRUE
 )
 
-
 ```
+:::
 
-## The benefits
+##  More...
 
-Beyond creating a beautiful map very quickly and easily, there are more benefits:
+### 8 types of maps ([+info](https://riatelab.github.io/mapsf/articles/mapsf.html))
 
--   Ability to show legend easily
--   Ability to change projection
+![Proportional symbols](https://riatelab.github.io/mapsf/articles/mapsf_files/figure-html/mf_prop-1.png)
+![Poportional symbols choropleth](https://riatelab.github.io/mapsf/articles/mapsf_files/figure-html/mf_map_pc-1.png)
+
+![Links maps](https://riatelab.github.io/mapsf/articles/mapsf_files/figure-html/mf_grad-1.png)
+
+
+---
+
+mapsf can do [facetted maps](https://riatelab.github.io/mapsf/articles/web_only/how_to_create_faceted_maps.html) (small multiples)
+
+![[Facetted maps](https://riatelab.github.io/mapsf/articles/web_only/how_to_create_faceted_maps.html) in a loop](https://riatelab.github.io/mapsf/articles/web_only/img/fig2-1.png)
+
+---
+
+Theming
+
+![11 Built-in themes](img/mapsf_themes.png)
 
 ## More info
 
--   <https://riatelab.github.io/mapsf/>
+-  Extensive official documentation <https://riatelab.github.io/mapsf/>
+-  Tutorial about plotting with base R <https://towardsdatascience.com/base-plotting-in-r-eb365da06b22>
 
-# Wrap up
+# Wrap up {.inverse}
 
 1.  We have a better understanding about what geospatial data and maps are (and what they entail!)
 2.  We have been introduced to a number of packages, each one performing different functions
 3.  We have been exposed to code showing affordances and potentialities of packages, to inform our decisions
 
-#  {#thanks data-menu-title="Thanks" background-image="https://slides.carloscamara.es/img/thanks/t.hanks.gif"}
+## More... 
+
+::: columns
+
+::: {.column width="70%"}
+Of course, there's way more to know about working with geospatial data in R. If you're interested, please refer to [Geocomputation with R](https://r.geocompx.org/), by Robin Lovelace, Jakub Nowosad and Jannes Muenchow.
+
+
+
+:::
+
+::: {.column width="30%"}
+
+![](https://r.geocompx.org/images/cover.png)
+
+:::
+
+:::
+
+[...or wait to hear Robin sharing that in an upcoming WRUG session (stay tunned!)]{.smaller80}
+
+# {#thanks data-menu-title="Thanks" background-image="https://slides.carloscamara.es/img/thanks/t.hanks.gif"}
+
+
 
 # [Questions?]{.center .bottom} {.inverse}
 
