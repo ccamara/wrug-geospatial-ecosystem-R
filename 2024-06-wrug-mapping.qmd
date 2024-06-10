@@ -657,13 +657,21 @@ map_facet
 
 ```
 
-##  {#map-heatmap2 data-menu-title="Heatmap" background-image="img/heatmap.png"}
+##  Heatmaps
 
-##  {#map-facets2 data-menu-title="Facets" background-image="img/map-facets.png"}
+![Heatmaps](img/heatmap.png)
 
-##  {#tmap-composite data-menu-title="Composite" background-image="img/tmap-example-composite.png"}
+##  Facets / small multiples
 
-##  {#tmap-theming data-menu-title="Theming" background-image="img/tmap-example-theming.png"}
+![Facetted maps](img/map-facets.png)
+
+## Composite maps
+
+![Combining different layers](img/tmap-example-composite.png)
+
+##  Theming
+
+![Themes](img/tmap-example-theming.png)
 
 ## More info about tmap
 
