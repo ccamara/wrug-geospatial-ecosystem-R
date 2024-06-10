@@ -45,11 +45,11 @@ That's the question I've been asked a lot, and the question I will try to answer
 
 ## Aims {background-image="img/roadmap.png" background-opacity="0.5"}
 
--   Provide an overview of the mapping process in R
+-   Provide an **overview of the mapping process** in R
     -   Identifying different components of a map
     -   Introducing different R packages for specific tasks
--   Provide the theoretical foundations to understand the (many) tutorials about maps and geospatial information (with R)
--   Provide some basic code examples to highlight basic concepts and packages
+-   Provide the **theoretical foundations** to understand the (many) tutorials about maps and geospatial information (with R)
+-   Provide some **basic code examples** to highlight basic concepts and packages
 
 . . .
 
@@ -132,22 +132,22 @@ Currently, R's data structure to stores spatial data is a `sf` object (or spatia
 
 [\* But it could be something else, like the Moon, [Middle Earth](https://www.andrewheiss.com/blog/2023/04/26/middle-earth-mapping-sf-r-gis/)...]{.smaller60 .bottom}
 
-## Type of spatial data
+## Types of spatial data
 
 ::: columns
 ::: {.column width="50%"}
-According to
+According to how spatial information is stored:
 
--   Vector: geometry is defined by their coordinates
--   Raster: made of pixels. Are thematic (i.e. land cover)
+-   **Vector:** geometry is defined by their coordinates
+-   **Raster:** made of pixels. Are thematic (i.e. land cover)
 :::
 
 ::: {.column width="50%"}
-(Vectors) According to their geometry:
+According to their geometry (Vectors) :
 
 -   **Points** expressed as pairs of `lat, long`, or `x, y` (i.e. markers).
--   **Lines** edges connecting (i.e. streets)
--   **Polygons** (i.e. countries' borders)
+-   **Lines** edges connecting points (i.e. streets)
+-   **Polygons/Multipolygons** closed (i.e. countries' borders)
 -   (basemaps)
 :::
 :::
@@ -202,6 +202,10 @@ According to
 Note that the R ecosystem has changed a lot over time, and older tutorials may talk about deprecated packages such as `sp`, `ggmap`, `terra`...
 :::
 :::
+:::
+
+::: notes
+There are more specialised packages, such as routing, or specific analyses.
 :::
 
 # Case: Geocoding with `{tidygeocoder}` {.inverse background-image="https://jessecambon.github.io/tidygeocoder/reference/figures/tidygeocoder_hex.png" background-size="10%" background-position="90% 50%"}
@@ -412,7 +416,7 @@ plot_ggchoro +
 
 ## Pro-tip: Plotly
 
-[We can use \``plotly::ggplotly()` to turn a ggplot map into an interactive map:]{.smaller90}
+[We can use `plotly::ggplotly()` to turn a ggplot map into an interactive map:]{.smaller90}
 
 ```{r}
 plotly::ggplotly(plot_ggchoro)
@@ -426,7 +430,7 @@ plotly::ggplotly(plot_ggchoro)
 
 In the next examples, we will be using specialised packages for visualising geospatial data
 
-# Case: Interactive map using leaflet {.inverse}
+# Case: Interactive map using `{leaflet}` {.inverse}
 
 We will create a couple of (basic) interactive maps like the ones you're used to see in many websites.
 
@@ -438,10 +442,10 @@ library(leaflet)
 
 leaflet(data = cities_world[cities_world$capital == "primary", ]) |> 
   addTiles() |>   # Add default OpenStreetMap map tiles
-  addCircles(~lng, ~lat, radius = ~population/100)
+  addCircles(~lng, ~lat, radius = ~population/100, label=~city)
 ```
 
-## Choropleth maps
+## Choropleth maps {.smaller80}
 
 ```{r}
 leaflet() |> 
@@ -691,7 +695,7 @@ head(englandHealthStats, 4)
 
 ------------------------------------------------------------------------
 
-::: {.smaller80}
+::: smaller80
 -   `boundaries_counties_ua_buc.gpkg`: Counties and Unitary Authorities (December 2019) Boundaries UK BUC, from the [ONS Geoportal](https://geoportal.statistics.gov.uk/maps/counties-and-unitary-authorities-december-2019-boundaries-uk-buc)
 
 ```{r}
@@ -701,7 +705,6 @@ boundaries_counties_ua_buc <- read_sf("data/CTYUA_Dec_2019_UGCB_in_the_UK_2022_4
 head(boundaries_counties_ua_buc, 4)
 
 ```
-
 :::
 
 ## Combining data together {.smaller80}
@@ -726,7 +729,7 @@ mf_map(x = sdf, type = "choro", var = "low_pay")
 
 ------------------------------------------------------------------------
 
-::: {.smaller80}
+::: smaller80
 We can improve it further. {mapsf} follows the same logic (And parameters) as base R graphics:
 
 ```{r}
@@ -759,23 +762,31 @@ mf_layout(
 ```
 :::
 
-##  More...
+## More...
 
 ### 8 types of maps ([+info](https://riatelab.github.io/mapsf/articles/mapsf.html))
 
+::: columns
+::: {.column width="30%"}
 ![Proportional symbols](https://riatelab.github.io/mapsf/articles/mapsf_files/figure-html/mf_prop-1.png)
+:::
+
+::: {.column width="30%"}
 ![Poportional symbols choropleth](https://riatelab.github.io/mapsf/articles/mapsf_files/figure-html/mf_map_pc-1.png)
+:::
 
+::: {.column width="30%"}
 ![Links maps](https://riatelab.github.io/mapsf/articles/mapsf_files/figure-html/mf_grad-1.png)
+:::
+:::
 
-
----
+------------------------------------------------------------------------
 
 mapsf can do [facetted maps](https://riatelab.github.io/mapsf/articles/web_only/how_to_create_faceted_maps.html) (small multiples)
 
 ![[Facetted maps](https://riatelab.github.io/mapsf/articles/web_only/how_to_create_faceted_maps.html) in a loop](https://riatelab.github.io/mapsf/articles/web_only/img/fig2-1.png)
 
----
+------------------------------------------------------------------------
 
 Theming
 
@@ -783,8 +794,8 @@ Theming
 
 ## More info
 
--  Extensive official documentation <https://riatelab.github.io/mapsf/>
--  Tutorial about plotting with base R <https://towardsdatascience.com/base-plotting-in-r-eb365da06b22>
+-   Extensive official documentation <https://riatelab.github.io/mapsf/>
+-   Tutorial about plotting with base R <https://towardsdatascience.com/base-plotting-in-r-eb365da06b22>
 
 # Wrap up {.inverse}
 
@@ -792,30 +803,21 @@ Theming
 2.  We have been introduced to a number of packages, each one performing different functions
 3.  We have been exposed to code showing affordances and potentialities of packages, to inform our decisions
 
-## More... 
+## More...
 
 ::: columns
-
 ::: {.column width="70%"}
 Of course, there's way more to know about working with geospatial data in R. If you're interested, please refer to [Geocomputation with R](https://r.geocompx.org/), by Robin Lovelace, Jakub Nowosad and Jannes Muenchow.
-
-
-
 :::
 
 ::: {.column width="30%"}
-
 ![](https://r.geocompx.org/images/cover.png)
-
 :::
-
 :::
 
 [...or wait to hear Robin sharing that in an upcoming WRUG session (stay tunned!)]{.smaller80}
 
-# {#thanks data-menu-title="Thanks" background-image="https://slides.carloscamara.es/img/thanks/t.hanks.gif"}
-
-
+#  {#thanks data-menu-title="Thanks" background-image="https://slides.carloscamara.es/img/thanks/t.hanks.gif"}
 
 # [Questions?]{.center .bottom} {.inverse}
 
